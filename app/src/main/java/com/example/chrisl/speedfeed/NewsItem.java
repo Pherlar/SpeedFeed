@@ -12,7 +12,7 @@ public class NewsItem {
     private String mAuthor;
 
     //Date published
-    private Long mDatePublished;
+    private String mDatePublished;
 
     //website URL of the story
     private String mUrl;
@@ -20,7 +20,7 @@ public class NewsItem {
      //Create a new NewsStory object.
      //and assign variable names to the parameters passed in to the method
 
-    public NewsItem (String headline, String section, String author, Long datePublished, String Url){
+    public NewsItem (String headline, String section, String author, String datePublished, String Url){
         mHeadline = headline;
         mSection = section;
         mAuthor = author;
@@ -37,7 +37,7 @@ public class NewsItem {
 
     public String getAuthor() {return mAuthor;}
 
-    public Long getDatePublished() {return mDatePublished;}
+    public String getDatePublished() {return mDatePublished;}
 
     public String getUrl() {return mUrl;}
 
