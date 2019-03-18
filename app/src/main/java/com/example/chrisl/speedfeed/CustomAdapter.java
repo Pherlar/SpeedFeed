@@ -57,6 +57,11 @@ public class CustomAdapter extends ArrayAdapter<NewsItem> {
         // Display the location of the current earthquake in that TextView
         authorTVHolder.setText(currentNewsItem.getAuthor());
 
+        // Find the TextView with view ID type_tv
+        TextView typeTVHolder = listItemView.findViewById(R.id.type_tv);
+        // Display the location of the current earthquake in that TextView
+        typeTVHolder.setText(currentNewsItem.getType());
+
         // Find the TextView with view ID date_tv
         TextView dateTVHolder = listItemView.findViewById(R.id.date_tv);
         // Display the date of the current earthquake in that TextView

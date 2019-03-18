@@ -6,8 +6,6 @@ import android.content.Context;
 
 public class NewsItemLoader extends AsyncTaskLoader<List<NewsItem>> {
 
-    /** Tag for log messages */
-    private static final String LOG_TAG = NewsItemLoader.class.getName();
 
     /** Query URL */
     private String mUrl;

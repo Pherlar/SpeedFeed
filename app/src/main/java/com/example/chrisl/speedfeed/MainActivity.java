@@ -1,5 +1,4 @@
 package com.example.chrisl.speedfeed;
-
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -7,12 +6,15 @@ import android.content.Loader;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
+
 import android.widget.ListView;
 import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +34,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        //Load in custom Toolbar
+        Toolbar mTopToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mTopToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+
         //get a reference to the List View and attach the adapter to the list view
         ListView listView = findViewById(R.id.list);
 
         // Create a new adapter that takes an empty list of newsItems as input
         mAdapter = new CustomAdapter(this, new ArrayList<NewsItem>());
         mEmptyStateTV = findViewById(R.id.empty_view);
+
         //set the empty adapter on the list view
         listView.setAdapter(mAdapter);
 
@@ -84,7 +95,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             // Update empty state with no connection error message
 
             mEmptyStateTV.setText(R.string.no_internet_connection);
+
+
         }
+
     }
 
     @Override
@@ -126,5 +140,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Loader reset, so we can clear out our existing data.
         mAdapter.clear();
     }
+
+
 
 }

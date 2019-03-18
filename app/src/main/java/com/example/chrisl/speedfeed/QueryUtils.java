@@ -1,15 +1,10 @@
 package com.example.chrisl.speedfeed;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,12 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import static java.security.AccessController.getContext;
 
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
@@ -52,7 +43,6 @@ public final class QueryUtils {
         if (TextUtils.isEmpty(newsItemJSON)) {
             return null;
         }
-
 
         // Create an empty ArrayList that we can start adding News Items to
         List<NewsItem> newsItems = new ArrayList<>();
@@ -87,6 +77,9 @@ public final class QueryUtils {
                 String webPublicationDate = currentNewsItem.getString("webPublicationDate");
 
                 //Extract the value for the key called "webUrl"
+                String type = currentNewsItem.getString("type");
+
+                //Extract the value for the key called "type"
                 String webUrl = currentNewsItem.getString("webUrl");
 
                 //In order to extract the author name we need to get it from the 'tags' object
@@ -106,15 +99,13 @@ public final class QueryUtils {
 
 
                 // Create a new NewsItem object with the attributes collected above
-                NewsItem newsItem = new NewsItem(webTitle, sectionName, author, webPublicationDate, webUrl);
+                NewsItem newsItem = new NewsItem(webTitle, sectionName, author, webPublicationDate, webUrl, type);
 
                 // Add the new NewsItem to the list of NewsItems.
                 newsItems.add(newsItem);
 
                 Log.i("NewsItem", sectionName + " , " + webTitle + " , " + webPublicationDate + " , " + author + " , " + webUrl);
             }
-
-
 
         } catch (JSONException e) {
             // If an error is thrown when executing any of the above statements in the "try" block,
@@ -126,10 +117,6 @@ public final class QueryUtils {
         // Return the list of newsItems
         return newsItems;
     }
-
-
-
-
 
     public static List<NewsItem> getNetworkData(String requestUrl) {
 

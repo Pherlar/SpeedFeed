@@ -17,15 +17,19 @@ public class NewsItem {
     //website URL of the story
     private String mUrl;
 
+    //Type of the item
+    private String mType;
+
      //Create a new NewsStory object.
      //and assign variable names to the parameters passed in to the method
 
-    public NewsItem (String headline, String section, String author, String datePublished, String Url){
+    public NewsItem (String headline, String section, String author, String datePublished, String Url, String type){
         mHeadline = headline;
         mSection = section;
         mAuthor = author;
         mDatePublished = datePublished;
         mUrl = Url;
+        mType = type;
     }
 
     /**
@@ -34,6 +38,8 @@ public class NewsItem {
     public String getHeadline(){return mHeadline;}
 
     public String getSection(){return mSection;}
+
+    public String getType() {return mType;}
 
     public String getAuthor() {return mAuthor;}
 
