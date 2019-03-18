@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int LOADER_ID = 1;
     private CustomAdapter mAdapter;
     private static final String REQUEST_URL =
-            "https://content.guardianapis.com/search?order-by=newest&format=json&section=sport&page-size=100&order-by=newest&show-tags=contributor&q=motorsports%20or%20formula%20one%20or%20f1%20&api-key=f9e65902-1b87-44a4-bcec-9924bd25c8fd";
+            "https://content.guardianapis.com/search?";
 
 
     @Override
@@ -91,7 +91,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public Loader<List<NewsItem>> onCreateLoader(int i, Bundle bundle) {
         Uri baseUri = Uri.parse(REQUEST_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
-        //uriBuilder.appendQueryParameter("format", "geojson");
+        //order-by=newest&format=json&section=sport&page-size=100&order-by=newest&show-tags=contributor&q=motorsports%20or%20formula%20one%20or%20f1%20&api-key=f9e65902-1b87-44a4-bcec-9924bd25c8fd"
+        uriBuilder.appendQueryParameter("format", "json");
+        uriBuilder.appendQueryParameter("section", "sport");
+        uriBuilder.appendQueryParameter("page-size", "30");
+        uriBuilder.appendQueryParameter("order-by", "newest");
+        uriBuilder.appendQueryParameter("show-tags", "contributor");
+        uriBuilder.appendQueryParameter("q", "motorsports OR \"formula one\" OR f1 OR Supercars");
+        uriBuilder.appendQueryParameter("api-key","f9e65902-1b87-44a4-bcec-9924bd25c8fd");
         return new NewsItemLoader(this,uriBuilder.toString());
     }
 
