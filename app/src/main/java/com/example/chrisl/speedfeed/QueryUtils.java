@@ -1,21 +1,38 @@
 package com.example.chrisl.speedfeed;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.res.Resources;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import static java.security.AccessController.getContext;
 
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
  */
 public final class QueryUtils {
 
-    public static String NETWORK_RESPONSE = "PLACEHOLDER";
+
+    //Tag for the log messages
+    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
 
     /**
@@ -30,20 +47,22 @@ public final class QueryUtils {
      * Return a list of NewsItem objects that has been built up from
      * parsing a JSON response.
      */
-    public static ArrayList<NewsItem> extractNewsItems() {
+    public static List<NewsItem> extractNewsItemsFromJson(String newsItemJSON) {
+        // If the JSON string is empty or null, then return early.
+        if (TextUtils.isEmpty(newsItemJSON)) {
+            return null;
+        }
+
 
         // Create an empty ArrayList that we can start adding News Items to
-        ArrayList<NewsItem> newsItems = new ArrayList<>();
+        List<NewsItem> newsItems = new ArrayList<>();
 
         // Try to parse the network response. If there's a problem
         // an exception object will be thrown.
         // Catch the exception so the app doesn't crash, and print the error message to the logs.
         try {
-            //get the data from the network
-            getNetworkData();
-
             // Create a JSONObject from the SAMPLE_JSON_RESPONSE string
-            JSONObject baseJsonResponse = new JSONObject(NETWORK_RESPONSE);
+            JSONObject baseJsonResponse = new JSONObject(newsItemJSON);
 
             // Extract the JSONObject associated with the key called "response",
             // which represents a list of news items.
@@ -70,23 +89,32 @@ public final class QueryUtils {
                 //Extract the value for the key called "webUrl"
                 String webUrl = currentNewsItem.getString("webUrl");
 
+                //In order to extract the author name we need to get it from the 'tags' object
                 //Extract the JSONarray for the key "tag"
                 JSONArray tagsArray = currentNewsItem.getJSONArray("tags");
 
-                //Assume Tags Array only has one entry
+
+                //if Tags Array has one entry, get the Author name out
+                //String author = Resources.getSystem().getString(R.string.empty_string);
+                //if (tagsArray.length()==1){
                 JSONObject tagsObject = tagsArray.getJSONObject(0);
                 //Extract the value for the Author (inside "tags" Array, key "WebTitle")
                 String author = tagsObject.getString("webTitle");
+                //else if there is no tags array
+                //else{
+                //    return null;
+
 
                 // Create a new NewsItem object with the attributes collected above
-                NewsItem newsItem = new NewsItem(webTitle,sectionName,author,webPublicationDate,webUrl);
+                NewsItem newsItem = new NewsItem(webTitle, sectionName, author, webPublicationDate, webUrl);
 
                 // Add the new NewsItem to the list of NewsItems.
                 newsItems.add(newsItem);
 
-                Log.i("NewsItem", sectionName + " , " + webTitle + " , " + webPublicationDate + " , " + author + " , " + webUrl );
-
+                Log.i("NewsItem", sectionName + " , " + webTitle + " , " + webPublicationDate + " , " + author + " , " + webUrl);
             }
+
+
 
         } catch (JSONException e) {
             // If an error is thrown when executing any of the above statements in the "try" block,
@@ -103,13 +131,99 @@ public final class QueryUtils {
 
 
 
-    private static String getNetworkData() {
+    public static List<NewsItem> getNetworkData(String requestUrl) {
 
-        /** Sample JSON response for a USGS query */
-         NETWORK_RESPONSE = "{\"response\":{\"status\":\"ok\",\"userTier\":\"developer\",\"total\":11803,\"startIndex\":1,\"pageSize\":3,\"currentPage\":1,\"pages\":3935,\"orderBy\":\"newest\",\"results\":[{\"id\":\"sport/2019/mar/17/valtteri-bottas-leads-from-first-turn-to-win-australian-grand-prix\",\"type\":\"article\",\"sectionId\":\"sport\",\"sectionName\":\"Sport\",\"webPublicationDate\":\"2019-03-17T07:11:29Z\",\"webTitle\":\"Valtteri Bottas dominates Australian Grand Prix to win Formula One opener\",\"webUrl\":\"https://www.theguardian.com/sport/2019/mar/17/valtteri-bottas-leads-from-first-turn-to-win-australian-grand-prix\",\"apiUrl\":\"https://content.guardianapis.com/sport/2019/mar/17/valtteri-bottas-leads-from-first-turn-to-win-australian-grand-prix\",\"tags\":[{\"id\":\"profile/gilesrichards\",\"type\":\"contributor\",\"webTitle\":\"Giles Richards\",\"webUrl\":\"https://www.theguardian.com/profile/gilesrichards\",\"apiUrl\":\"https://content.guardianapis.com/profile/gilesrichards\",\"references\":[],\"bio\":\"<p>Giles Richards is a Guardian sports writer</p>\",\"bylineImageUrl\":\"https://uploads.guim.co.uk/2017/09/28/Giles_Richards_280.jpg\",\"bylineLargeImageUrl\":\"https://uploads.guim.co.uk/2018/10/19/Giles_Richards,_L.png\",\"firstName\":\"Giles\",\"lastName\":\"Richards\",\"twitterHandle\":\"giles_richards\"}],\"isHosted\":false,\"pillarId\":\"pillar/sport\",\"pillarName\":\"Sport\"},{\"id\":\"sport/live/2019/mar/17/australian-grand-prix-formula-one-2019-season-opener-live\",\"type\":\"liveblog\",\"sectionId\":\"sport\",\"sectionName\":\"Sport\",\"webPublicationDate\":\"2019-03-17T07:04:22Z\",\"webTitle\":\"Australian Grand Prix: Bottas wins Formula One season opener – as it happened\",\"webUrl\":\"https://www.theguardian.com/sport/live/2019/mar/17/australian-grand-prix-formula-one-2019-season-opener-live\",\"apiUrl\":\"https://content.guardianapis.com/sport/live/2019/mar/17/australian-grand-prix-formula-one-2019-season-opener-live\",\"tags\":[{\"id\":\"profile/richard-gadsby\",\"type\":\"contributor\",\"webTitle\":\"Richard Gadsby\",\"webUrl\":\"https://www.theguardian.com/profile/richard-gadsby\",\"apiUrl\":\"https://content.guardianapis.com/profile/richard-gadsby\",\"references\":[],\"bio\":\"<p>Richard is a sports journalist based in Sydney. He has worked for the Sydney Morning Herald, Fox Sports and News Limited</p>\",\"firstName\":\"gadsby\",\"lastName\":\"richard\"}],\"isHosted\":false,\"pillarId\":\"pillar/sport\",\"pillarName\":\"Sport\"},{\"id\":\"sport/live/2019/mar/16/sportwatch-nrl-a-league-aflw-and-more-live\",\"type\":\"liveblog\",\"sectionId\":\"sport\",\"sectionName\":\"Sport\",\"webPublicationDate\":\"2019-03-16T11:10:36Z\",\"webTitle\":\"Sportwatch: NRL, A-League, AFLW and more - as it happened\",\"webUrl\":\"https://www.theguardian.com/sport/live/2019/mar/16/sportwatch-nrl-a-league-aflw-and-more-live\",\"apiUrl\":\"https://content.guardianapis.com/sport/live/2019/mar/16/sportwatch-nrl-a-league-aflw-and-more-live\",\"tags\":[{\"id\":\"profile/richard-parkin\",\"type\":\"contributor\",\"webTitle\":\"Richard Parkin\",\"webUrl\":\"https://www.theguardian.com/profile/richard-parkin\",\"apiUrl\":\"https://content.guardianapis.com/profile/richard-parkin\",\"references\":[],\"bio\":\"<p>Richard Parkin is a Sydney-based journalist and the casual sport editor at Guardian Australia. He was the football analyst on SBS's The Full Brazilian</p>\",\"bylineImageUrl\":\"https://uploads.guim.co.uk/2019/03/04/Richard_Parkin_small.jpg\",\"bylineLargeImageUrl\":\"https://uploads.guim.co.uk/2019/03/04/Richard_Parkinlarge.png\",\"firstName\":\"Richard\",\"lastName\":\"Parkin\",\"twitterHandle\":\"rrjparkin\"}],\"isHosted\":false,\"pillarId\":\"pillar/sport\",\"pillarName\":\"Sport\"}]}}";
+        //create URL object
+        URL url = createUrl(requestUrl);
 
-        return NETWORK_RESPONSE;
+        //Perform HTTP request to the URL and receive a JSON response back
+        String jsonResponse = null;
+        try {
+            jsonResponse = makeHttpRequest(url);
+        } catch (IOException e){
+            Log.e(LOG_TAG, "Problem making the Http request");
+        }
 
+        List<NewsItem> newsItems = extractNewsItemsFromJson(jsonResponse);
+
+        //Return the list of newsItems
+        return newsItems;
+
+    }
+
+    /**
+     * Returns new URL object from the given string URL.
+     */
+    private static URL createUrl(String stringUrl) {
+        URL url = null;
+        try {
+            url = new URL(stringUrl);
+        } catch (MalformedURLException e) {
+            Log.e(LOG_TAG, "Problem building the URL ", e);
+        }
+        return url;
+    }
+
+    /**
+     * Make an HTTP request to the given URL and return a String as the response.
+     */
+    private static String makeHttpRequest(URL url) throws IOException {
+        String jsonResponse = "";
+
+        // If the URL is null, then return early.
+        if (url == null) {
+            return jsonResponse;
+        }
+
+        HttpURLConnection urlConnection = null;
+        InputStream inputStream = null;
+        try {
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setReadTimeout(10000 /* milliseconds */);
+            urlConnection.setConnectTimeout(15000 /* milliseconds */);
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            // If the request was successful (response code 200),
+            // then read the input stream and parse the response.
+            if (urlConnection.getResponseCode() == 200) {
+                inputStream = urlConnection.getInputStream();
+                jsonResponse = readFromStream(inputStream);
+            } else {
+                Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem retrieving the newsItem JSON results.", e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            if (inputStream != null) {
+                // Closing the input stream could throw an IOException, which is why
+                // the makeHttpRequest(URL url) method signature specifies than an IOException
+                // could be thrown.
+                inputStream.close();
+            }
+        }
+        return jsonResponse;
+    }
+
+    /**
+     * Convert the {@link InputStream} into a String which contains the
+     * whole JSON response from the server.
+     */
+    private static String readFromStream(InputStream inputStream) throws IOException {
+        StringBuilder output = new StringBuilder();
+        if (inputStream != null) {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            String line = reader.readLine();
+            while (line != null) {
+                output.append(line);
+                line = reader.readLine();
+            }
+        }
+        return output.toString();
     }
 
 
