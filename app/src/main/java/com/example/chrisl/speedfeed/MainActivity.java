@@ -34,13 +34,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         //Load in custom Toolbar
         Toolbar mTopToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mTopToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
 
         //get a reference to the List View and attach the adapter to the list view
         ListView listView = findViewById(R.id.list);
@@ -93,9 +90,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             loadingIndicator.setVisibility(View.GONE);
 
             // Update empty state with no connection error message
-
             mEmptyStateTV.setText(R.string.no_internet_connection);
-
 
         }
 
@@ -105,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public Loader<List<NewsItem>> onCreateLoader(int i, Bundle bundle) {
         Uri baseUri = Uri.parse(REQUEST_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
+        //use a URI builder to create the web search - the example query is:
         //order-by=newest&format=json&section=sport&page-size=100&order-by=newest&show-tags=contributor&q=motorsports%20or%20formula%20one%20or%20f1%20&api-key=f9e65902-1b87-44a4-bcec-9924bd25c8fd"
         uriBuilder.appendQueryParameter("format", "json");
         uriBuilder.appendQueryParameter("section", "sport");
